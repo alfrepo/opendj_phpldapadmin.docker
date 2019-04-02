@@ -1,0 +1,37 @@
+version: "3"
+services:
+
+
+    phpldapadmin:
+        container_name: phpldapadmin
+        image: osixia/phpldapadmin:0.7.2
+        depends_on:
+          - opendj
+        ports:
+          - 4200:80
+          - 5000:443
+        networks:
+          - ldapnetwork
+        environment:
+            - "PHPLDAPADMIN_LDAP_HOSTS=#PYTHON2BASH:[{'opendj':[{'server':[{'tls':False}, {'port':1389}]}, {'login':[{'bind_id':'cn=Directory Manager'}, {'bind_pass':'123abc'}]}]}]"
+
+    opendj:
+        container_name: opendj
+        image: openidentityplatform/opendj
+        ports:
+          - 1389:1389
+          - 1636:1636
+          - 3000:4444
+        networks:
+          - ldapnetwork
+        hostname: "opendj"
+        environment:
+          - 'ROOT_USER_DN=cn=Directory Manager'
+          - 'OPENDJ_USER=opendj'
+          - 'ROOT_PASSWORD=123abc'
+          - 'BASE_DN=dc=dlc,dc=intra'
+
+networks:
+  ldapnetwork:
+    # Use a custom driver
+    driver: bridge
